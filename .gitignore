@@ -1,0 +1,39 @@
+# BioSense AI
+
+## Virtual Electronic Nose for AI-Assisted Cancer Risk Pattern Screening
+
+BioSense AI is an experimental research prototype that simulates a software-based electronic nose using publicly documented breath, VOC or electronic-nose sensor research data.
+
+The platform combines full-stack web development, machine learning and explainable AI to investigate model-associated patterns in research datasets.
+
+> **Medical Research Disclaimer:** BioSense AI is an experimental research prototype and is not a medical diagnostic device. Its results must not be used to diagnose, treat or rule out cancer. Medical decisions should be made only by qualified healthcare professionals.
+
+---
+
+## Project Status
+
+🚧 Currently under development.
+
+The project is being developed incrementally as a full-stack academic research project.
+
+---
+
+## Planned Architecture
+
+```text
+React Frontend
+       |
+       | REST API
+       v
+Spring Boot Backend
+       |
+       +------------------+
+       |                  |
+       v                  v
+PostgreSQL            FastAPI AI Service
+                           |
+                           v
+                     ML Pipeline
+                           |
+                           v
+                     Trained Model
