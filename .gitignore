@@ -54,3 +54,6 @@ dataset/raw/S-OH/
 dataset/processed/*.csv
 dataset/processed/*.parquet
 dataset/processed/*.json
+.token
+dataset/processed/*.json
+dataset/processed/*.json
