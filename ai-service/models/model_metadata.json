@@ -1,0 +1,28 @@
+{
+  "model_version": "biosense-v1",
+  "model_type": "RandomForestClassifier",
+  "dataset": "S-O-H",
+  "task": "multiclass_classification",
+  "feature_count": 170,
+  "classes": [
+    "A15",
+    "B18",
+    "C34",
+    "E11",
+    "J44",
+    "K29",
+    "K76",
+    "N18",
+    "Z00"
+  ],
+  "training_samples": 1234,
+  "random_state": 42,
+  "n_estimators": 300,
+  "excluded_columns": [
+    "patient_id",
+    "diagnosis"
+  ],
+  "excluded_feature_pattern": "*_sample_count",
+  "research_use_only": true,
+  "clinical_diagnostic_use": false
+}
