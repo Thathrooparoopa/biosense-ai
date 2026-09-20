@@ -1,0 +1,83 @@
+BioSense AI - S-O-H Preprocessing Report
+======================================================================
+
+Source dataset: C:\Users\V.THATHROOPA\Desktop\BioSense-AI\dataset\raw\S-OH
+Metadata rows: 1234
+Target rows: 356
+Successfully processed: 356
+Failed patients: 0
+
+Target mapping:
+  0 = Z00 = Healthy Control
+  1 = C34 = Lung Cancer
+
+Primary sensor channels:
+R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15, R16, R17
+
+Number of feature columns: 187
+
+Feature extraction per channel:
+  - sample count
+  - mean
+  - standard deviation
+  - minimum
+  - maximum
+  - median
+  - range
+  - first value
+  - last value
+  - mean absolute first difference
+  - standard deviation of first differences
+
+Target distribution:
+  0 - Healthy Control: 256
+  1 - Lung Cancer: 100
+
+Feature validation:
+  Missing feature values: 0
+  Infinite feature values: 0
+
+Short channel observations:
+  Threshold: < 300 samples
+  Total short-channel observations: 17
+  Patient 1113 (Z00), R1: 226 samples
+  Patient 1113 (Z00), R2: 226 samples
+  Patient 1113 (Z00), R3: 226 samples
+  Patient 1113 (Z00), R4: 226 samples
+  Patient 1113 (Z00), R5: 226 samples
+  Patient 1113 (Z00), R6: 226 samples
+  Patient 1113 (Z00), R7: 226 samples
+  Patient 1113 (Z00), R8: 226 samples
+  Patient 1113 (Z00), R9: 226 samples
+  Patient 1113 (Z00), R10: 226 samples
+  Patient 1113 (Z00), R11: 226 samples
+  Patient 1113 (Z00), R12: 226 samples
+  Patient 1113 (Z00), R13: 226 samples
+  Patient 1113 (Z00), R14: 226 samples
+  Patient 1113 (Z00), R15: 226 samples
+  Patient 1113 (Z00), R16: 226 samples
+  Patient 1113 (Z00), R17: 226 samples
+
+Output:
+  C:\Users\V.THATHROOPA\Desktop\BioSense-AI\dataset\processed\soh_binary_features.csv
+
+Failed patients:
+  None
+
+Processing policy:
+  - One row represents one patient.
+  - Only R1-R17 are used as the primary sensor inputs.
+  - No artificial sensor samples are created.
+  - Short but valid sensor sequences are retained.
+  - Sample counts are recorded as features.
+  - Patient_id is retained only as an identifier.
+  - Diagnosis and target are retained for labels.
+  - Age, gender, site, week and datetime are not used as model features.
+  - Auxiliary sensors are excluded from this first baseline dataset.
+  - No machine-learning model is trained in this phase.
+
+Medical disclaimer:
+This application is an experimental research prototype and is not
+a medical diagnostic device. Its results must not be used to diagnose,
+treat, or rule out cancer. Medical decisions should be made only by
+qualified healthcare professionals.
