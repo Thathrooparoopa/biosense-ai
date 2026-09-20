@@ -1,0 +1,328 @@
+BioSense AI - S-OH Dataset Exploration Report
+======================================================================
+
+======================================================================
+METADATA EXPLORATION
+======================================================================
+
+Number of rows: 1234
+Number of columns: 9
+
+Column names:
+  - Patient_id
+  - Patient_age
+  - Patient_gender
+  - Diagnosis
+  - D_class
+  - D_bin_class
+  - Datetime
+  - Week
+  - Site
+
+Data types:
+  - Patient_id: int64
+  - Patient_age: int64
+  - Patient_gender: str
+  - Diagnosis: str
+  - D_class: int64
+  - D_bin_class: int64
+  - Datetime: str
+  - Week: int64
+  - Site: str
+
+Missing values:
+  - Patient_id: 0
+  - Patient_age: 0
+  - Patient_gender: 0
+  - Diagnosis: 0
+  - D_class: 0
+  - D_bin_class: 0
+  - Datetime: 0
+  - Week: 0
+  - Site: 0
+
+First five rows:
+ Patient_id  Patient_age Patient_gender Diagnosis  D_class  D_bin_class            Datetime  Week  Site
+         26           53           male       Z00        0            0 2025-06-18 11:36:54     1 SiteA
+         28           45         female       Z00        0            0 2025-06-18 11:45:25     1 SiteA
+          2           30         female       Z00        0            0 2025-06-18 12:15:36     1 SiteA
+          4           26         female       Z00        0            0 2025-06-18 12:23:04     1 SiteA
+         11           30           male       Z00        0            0 2025-06-18 12:27:49     1 SiteA
+
+Descriptive statistics:
+         Patient_id  Patient_age Patient_gender Diagnosis      D_class  D_bin_class             Datetime         Week   Site
+count   1234.000000  1234.000000           1234      1234  1234.000000  1234.000000                 1234  1234.000000   1234
+unique          NaN          NaN              2         9          NaN          NaN                 1233          NaN      2
+top             NaN          NaN         female       Z00          NaN          NaN  2025-07-07 12:00:00          NaN  SiteA
+freq            NaN          NaN            690       256          NaN          NaN                    2          NaN   1027
+mean     791.466775    52.018639            NaN       NaN     3.445705     0.792545                  NaN     6.974878    NaN
+std      652.350615    16.427495            NaN       NaN     2.694030     0.405649                  NaN     3.607488    NaN
+min        1.000000    15.000000            NaN       NaN     0.000000     0.000000                  NaN     1.000000    NaN
+25%      319.250000    40.250000            NaN       NaN     1.000000     1.000000                  NaN     4.000000    NaN
+50%      627.500000    53.000000            NaN       NaN     3.000000     1.000000                  NaN     7.000000    NaN
+75%      945.750000    65.000000            NaN       NaN     6.000000     1.000000                  NaN    10.000000    NaN
+max     2236.000000    89.000000            NaN       NaN     8.000000     1.000000                  NaN    13.000000    NaN
+
+======================================================================
+DIAGNOSIS DISTRIBUTION
+======================================================================
+
+Diagnosis column detected: Diagnosis
+
+  Z00: 256 (20.75%)
+  K29: 138 (11.18%)
+  B18: 138 (11.18%)
+  E11: 128 (10.37%)
+  K76: 128 (10.37%)
+  N18: 128 (10.37%)
+  A15: 118 (9.56%)
+  C34: 100 (8.10%)
+  J44: 100 (8.10%)
+
+======================================================================
+DATA DIRECTORY STRUCTURE
+======================================================================
+
+Number of diagnosis directories: 9
+
+  A15: 118 files
+  B18: 138 files
+  C34: 100 files
+  E11: 128 files
+  J44: 100 files
+  K29: 138 files
+  K76: 128 files
+  N18: 128 files
+  Z00: 256 files
+
+Total data files: 1234
+
+======================================================================
+PATIENT FILE EXPLORATION
+======================================================================
+
+Sample patient file:
+C:\Users\V.THATHROOPA\Desktop\BioSense-AI\dataset\raw\S-OH\data\A15\patient_2002.json
+
+Top-level JSON keys:
+  - patient_id
+  - patient_diag_class
+  - startDateTime
+  - startTimeGases
+  - endTimeGases
+  - durationSec
+  - sensors
+
+Top-level value types:
+  - patient_id: int
+  - patient_diag_class: int
+  - startDateTime: str
+  - startTimeGases: int
+  - endTimeGases: int
+  - durationSec: int
+  - sensors: list
+
+Number of sensor groups: 5
+
+Sensor group: enose
+  Sample rate: 0.4
+  Channels: 19
+    R1: 359 samples
+    R2: 359 samples
+    R3: 359 samples
+    R4: 359 samples
+    R5: 359 samples
+    R6: 359 samples
+    R7: 359 samples
+    R8: 359 samples
+    R9: 359 samples
+    R10: 359 samples
+    R11: 359 samples
+    R12: 359 samples
+    R13: 359 samples
+    R14: 359 samples
+    R15: 359 samples
+    R16: 359 samples
+    R17: 359 samples
+    humidity: 359 samples
+    temperature: 359 samples
+
+Sensor group: ze03
+  Sample rate: 0.4
+  Channels: 1
+    0: 368 samples
+
+Sensor group: mhz14
+  Sample rate: 0.4
+  Channels: 1
+    0: 368 samples
+
+Sensor group: ze08
+  Sample rate: 0.4
+  Channels: 1
+    0: 368 samples
+
+Sensor group: bme280
+  Sample rate: 0.4
+  Channels: 3
+    pressure: 369 samples
+    temperature: 369 samples
+    humidity: 369 samples
+
+======================================================================
+eNOSE CHANNEL INSPECTION
+======================================================================
+
+Detected eNose channels: 19
+
+Channel: R1
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 0.0
+  Maximum: 723.0
+  Mean: 546.4038997214485
+  Standard deviation: 140.8307002396888
+
+Channel: R2
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 455.0
+  Maximum: 778.0
+  Mean: 720.3537604456825
+  Standard deviation: 28.656610400018195
+
+Channel: R3
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 315.0
+  Maximum: 458.0
+  Mean: 398.6685236768802
+  Standard deviation: 38.179214061605144
+
+Channel: R4
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 0.0
+  Maximum: 192.0
+  Mean: 147.9442896935933
+  Standard deviation: 22.54684049227296
+
+Channel: R5
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 388.0
+  Maximum: 587.0
+  Mean: 502.8718662952646
+  Standard deviation: 49.586223810233925
+
+Channel: R6
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 172.0
+  Maximum: 344.0
+  Mean: 276.5766016713092
+  Standard deviation: 46.48131851122565
+
+Channel: R7
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 262.0
+  Maximum: 502.0
+  Mean: 428.974930362117
+  Standard deviation: 59.88407736379525
+
+Channel: R8
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 6067.0
+  Maximum: 7000.0
+  Mean: 6567.108635097493
+  Standard deviation: 238.90486152062226
+
+Channel: R9
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 0.0
+  Maximum: 1290.0
+  Mean: 973.9721448467967
+  Standard deviation: 346.663891933565
+
+Channel: R10
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 0.0
+  Maximum: 2.0
+  Mean: 0.005571030640668524
+  Standard deviation: 0.1055559627938519
+
+Channel: R11
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 3176.0
+  Maximum: 3668.0
+  Mean: 3394.5069637883007
+  Standard deviation: 119.77651130696451
+
+Channel: R12
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 12367.0
+  Maximum: 14384.0
+  Mean: 13567.220055710306
+  Standard deviation: 413.6270471351996
+
+Channel: R13
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 14890.0
+  Maximum: 17174.0
+  Mean: 16190.245125348189
+  Standard deviation: 487.597784001939
+
+Channel: R14
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 3004.0
+  Maximum: 3411.0
+  Mean: 3204.1030640668523
+  Standard deviation: 108.26198292056418
+
+Channel: R15
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 6695.0
+  Maximum: 7592.0
+  Mean: 7146.161559888579
+  Standard deviation: 230.61902748183223
+
+Channel: R16
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 13203.0
+  Maximum: 15098.0
+  Mean: 14141.938718662952
+  Standard deviation: 484.3549319917392
+
+Channel: R17
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 8897.0
+  Maximum: 10194.0
+  Mean: 9557.384401114206
+  Standard deviation: 345.5329336656858
+
+Channel: humidity
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 44.0
+  Maximum: 44.0
+  Mean: 44.0
+  Standard deviation: 0.0
+
+Channel: temperature
+  Total samples: 359
+  Numeric samples: 359
+  Minimum: 10000.0
+  Maximum: 10000.0
+  Mean: 10000.0
+  Standard deviation: 0.0
