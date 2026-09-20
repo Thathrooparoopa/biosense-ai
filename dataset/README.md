@@ -1,46 +1,64 @@
 # BioSense AI Dataset
 
-This directory contains documentation and, where permitted, references to the research datasets used by BioSense AI.
+## Primary Dataset
 
-## Important
+BioSense AI uses the **Scent of Health (S-O-H)** public electronic-nose
+dataset as the primary research dataset for development and evaluation.
 
-BioSense AI will use legitimate, publicly documented research data.
+The dataset contains clinical breath measurements collected using an
+electronic-nose sensor array.
 
-No synthetic or fabricated medical dataset will be presented as real research data.
+## Dataset Overview
 
-## Dataset Selection
+- Dataset: Scent of Health (S-O-H)
+- Data type: Exhaled-breath electronic-nose measurements
+- Patients: 1,234
+- Diagnostic groups: 9
+- eNose channels: 17
+- Sampling rate: approximately 0.4 Hz
+- Measurement duration: approximately 895 seconds per sample
+- Clinical sites: 2
+- Collection period: 13 consecutive weeks
 
-The final dataset will be selected during the dataset discovery phase.
+The dataset includes a lung-cancer class identified by ICD-10 code C34.
 
-The selected dataset documentation will include:
+## Initial BioSense AI Research Task
 
-- Dataset name
-- Dataset source
-- Research publication
-- Dataset URL or repository
-- License
-- Number of samples
-- Number of features
-- Target variable
-- Class definitions
-- Data collection methodology, where documented
-- Known limitations
-- Citation information
+The first machine-learning task will investigate binary classification
+between:
 
-## Data Policy
+1. Healthy control
+2. Lung cancer
 
-Raw datasets will only be committed to this repository when their license and redistribution terms permit it.
+The exact preprocessing, feature extraction, model architecture,
+train/test strategy, and evaluation metrics will be defined in later
+phases.
 
-If redistribution is not permitted, this directory will contain:
+## Dataset Source
 
-- Dataset source information
-- Download instructions
-- Dataset citation
-- Expected data structure
-- Processing instructions
+Dataset:
+Scent of Health (S-O-H)
 
-## Medical Research Disclaimer
+Repository:
+https://huggingface.co/datasets/ivanpodd/S-OH
 
-The datasets and models used by BioSense AI are intended for academic and research purposes.
+Dataset DOI:
+10.57967/hf/9752
 
-They must not be interpreted as clinical diagnostic evidence.
+License:
+MIT according to the dataset repository.
+
+## Data Storage
+
+The original dataset should not be committed directly to the Git
+repository.
+
+Recommended local structure:
+
+```text
+dataset/
+├── raw/
+│   └── downloaded S-O-H files
+├── processed/
+│   └── generated feature datasets
+└── README.md
