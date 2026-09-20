@@ -1,20 +1,28 @@
-BioSense AI - S-O-H Preprocessing Report
+BioSense AI - S-O-H Multi-Class Preprocessing Report
 ======================================================================
 
-Source dataset: C:\Users\V.THATHROOPA\Desktop\BioSense-AI\dataset\raw\S-OH
 Metadata rows: 1234
-Target rows: 356
-Successfully processed: 356
+Successfully processed: 1234
 Failed patients: 0
 
-Target mapping:
-  0 = Z00 = Healthy Control
-  1 = C34 = Lung Cancer
+Research task:
+Multi-class classification across all diagnostic groups in S-O-H.
 
 Primary sensor channels:
 R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15, R16, R17
 
 Number of feature columns: 187
+
+Diagnosis distribution:
+  A15: 118
+  B18: 138
+  C34: 100
+  E11: 128
+  J44: 100
+  K29: 138
+  K76: 128
+  N18: 128
+  Z00: 256
 
 Feature extraction per channel:
   - sample count
@@ -28,10 +36,6 @@ Feature extraction per channel:
   - last value
   - mean absolute first difference
   - standard deviation of first differences
-
-Target distribution:
-  0 - Healthy Control: 256
-  1 - Lung Cancer: 100
 
 Feature validation:
   Missing feature values: 0
@@ -58,26 +62,26 @@ Short channel observations:
   Patient 1113 (Z00), R16: 226 samples
   Patient 1113 (Z00), R17: 226 samples
 
-Output:
-  C:\Users\V.THATHROOPA\Desktop\BioSense-AI\dataset\processed\soh_binary_features.csv
-
 Failed patients:
   None
 
 Processing policy:
   - One row represents one patient.
-  - Only R1-R17 are used as the primary sensor inputs.
+  - All diagnostic groups are retained.
+  - Only R1-R17 are used as primary sensor inputs.
   - No artificial sensor samples are created.
-  - Short but valid sensor sequences are retained.
-  - Sample counts are recorded as features.
-  - Patient_id is retained only as an identifier.
-  - Diagnosis and target are retained for labels.
-  - Age, gender, site, week and datetime are not used as model features.
-  - Auxiliary sensors are excluded from this first baseline dataset.
+  - Short valid recordings are retained.
+  - Sample counts are recorded.
+  - Patient_id is an identifier only.
+  - Diagnosis is the classification label.
+  - Age, gender, site, week and datetime are not model features.
+  - Auxiliary sensors are excluded from the first baseline.
   - No machine-learning model is trained in this phase.
 
+Output:
+  C:\Users\V.THATHROOPA\Desktop\BioSense-AI\dataset\processed\soh_multiclass_features.csv
+
 Medical disclaimer:
-This application is an experimental research prototype and is not
-a medical diagnostic device. Its results must not be used to diagnose,
-treat, or rule out cancer. Medical decisions should be made only by
-qualified healthcare professionals.
+This application is an experimental research prototype and is not a medical diagnostic device.
+Its results must not be used to diagnose, treat, or rule out cancer.
+Medical decisions should be made only by qualified healthcare professionals.

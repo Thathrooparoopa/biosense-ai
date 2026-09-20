@@ -17,29 +17,24 @@ METADATA_PATH = DATASET_ROOT / "metadata.csv"
 
 PROCESSED_DIR = PROJECT_ROOT / "dataset" / "processed"
 
-OUTPUT_CSV = PROCESSED_DIR / "soh_binary_features.csv"
-REPORT_PATH = PROCESSED_DIR / "preprocessing_report.txt"
+OUTPUT_CSV = (
+    PROCESSED_DIR / "soh_multiclass_features.csv"
+)
+
+REPORT_PATH = (
+    PROCESSED_DIR / "preprocessing_report.txt"
+)
 
 
 # ============================================================
 # Configuration
 # ============================================================
 
-TARGET_DIAGNOSES = {
-    "Z00": 0,
-    "C34": 1,
-}
+ENOSE_CHANNELS = [
+    f"R{i}"
+    for i in range(1, 18)
+]
 
-TARGET_NAMES = {
-    0: "Healthy Control",
-    1: "Lung Cancer",
-}
-
-ENOSE_CHANNELS = [f"R{i}" for i in range(1, 18)]
-
-# Used for reporting only.
-# We do not reject a patient solely because a channel
-# is shorter than this value.
 SHORT_SEQUENCE_THRESHOLD = 300
 
 
@@ -51,15 +46,12 @@ def find_patient_file(
     diagnosis: str,
     patient_id: int,
 ) -> Path:
-    """
-    Locate the patient JSON file for a given diagnosis
-    and patient ID.
-    """
 
     diagnosis_dir = DATA_DIR / diagnosis
 
     expected_file = (
-        diagnosis_dir / f"patient_{patient_id}.json"
+        diagnosis_dir
+        / f"patient_{patient_id}.json"
     )
 
     if expected_file.exists():
@@ -81,10 +73,9 @@ def find_patient_file(
     )
 
 
-def load_patient_json(path: Path) -> dict:
-    """
-    Load one patient JSON file.
-    """
+def load_patient_json(
+    path: Path,
+) -> dict:
 
     with path.open(
         "r",
@@ -96,15 +87,16 @@ def load_patient_json(path: Path) -> dict:
 def extract_enose_channels(
     patient_data: dict,
 ) -> dict[str, np.ndarray]:
-    """
-    Extract R1-R17 from the eNose sensor group.
-    """
 
-    sensors = patient_data.get("sensors", [])
+    sensors = patient_data.get(
+        "sensors",
+        []
+    )
 
     enose_sensor = None
 
     for sensor in sensors:
+
         if (
             isinstance(sensor, dict)
             and sensor.get("id") == "enose"
@@ -114,7 +106,7 @@ def extract_enose_channels(
 
     if enose_sensor is None:
         raise ValueError(
-            "enose sensor group not found"
+            "eNose sensor group not found"
         )
 
     extracted = {}
@@ -123,10 +115,16 @@ def extract_enose_channels(
         "channels",
         [],
     ):
-        if not isinstance(channel, dict):
+
+        if not isinstance(
+            channel,
+            dict,
+        ):
             continue
 
-        channel_id = channel.get("id")
+        channel_id = channel.get(
+            "id"
+        )
 
         if channel_id not in ENOSE_CHANNELS:
             continue
@@ -150,8 +148,9 @@ def extract_enose_channels(
     ]
 
     if missing_channels:
+
         raise ValueError(
-            f"Missing eNose channels: "
+            "Missing eNose channels: "
             f"{missing_channels}"
         )
 
@@ -162,96 +161,76 @@ def calculate_features(
     channel_name: str,
     values: np.ndarray,
 ) -> dict[str, float]:
-    """
-    Calculate statistical features from one
-    sensor time series.
-
-    No artificial padding or interpolation is used.
-    """
 
     if values.size == 0:
+
         raise ValueError(
             f"{channel_name} contains no samples"
         )
 
     if not np.isfinite(values).all():
+
         raise ValueError(
-            f"{channel_name} contains NaN or "
-            f"infinite values"
+            f"{channel_name} contains "
+            "NaN or infinite values"
         )
 
     differences = np.diff(values)
 
-    features = {
-        f"{channel_name}_sample_count": float(
-            len(values)
-        ),
+    return {
 
-        f"{channel_name}_mean": float(
-            np.mean(values)
-        ),
+        f"{channel_name}_sample_count":
+            float(len(values)),
 
-        f"{channel_name}_std": float(
-            np.std(values)
-        ),
+        f"{channel_name}_mean":
+            float(np.mean(values)),
 
-        f"{channel_name}_min": float(
-            np.min(values)
-        ),
+        f"{channel_name}_std":
+            float(np.std(values)),
 
-        f"{channel_name}_max": float(
-            np.max(values)
-        ),
+        f"{channel_name}_min":
+            float(np.min(values)),
 
-        f"{channel_name}_median": float(
-            np.median(values)
-        ),
+        f"{channel_name}_max":
+            float(np.max(values)),
 
-        f"{channel_name}_range": float(
-            np.ptp(values)
-        ),
+        f"{channel_name}_median":
+            float(np.median(values)),
 
-        f"{channel_name}_first": float(
-            values[0]
-        ),
+        f"{channel_name}_range":
+            float(np.ptp(values)),
 
-        f"{channel_name}_last": float(
-            values[-1]
-        ),
+        f"{channel_name}_first":
+            float(values[0]),
 
-        f"{channel_name}_mean_abs_diff": (
-            float(
-                np.mean(np.abs(differences))
-            )
-            if differences.size > 0
-            else 0.0
-        ),
+        f"{channel_name}_last":
+            float(values[-1]),
 
-        f"{channel_name}_diff_std": (
-            float(
-                np.std(differences)
-            )
-            if differences.size > 0
-            else 0.0
-        ),
+        f"{channel_name}_mean_abs_diff":
+            (
+                float(
+                    np.mean(
+                        np.abs(differences)
+                    )
+                )
+                if differences.size > 0
+                else 0.0
+            ),
+
+        f"{channel_name}_diff_std":
+            (
+                float(
+                    np.std(differences)
+                )
+                if differences.size > 0
+                else 0.0
+            ),
     }
-
-    return features
 
 
 def process_patient(
     metadata_row: pd.Series,
 ) -> tuple[dict, dict]:
-    """
-    Process one patient.
-
-    Returns:
-        features:
-            Patient-level ML feature dictionary.
-
-        diagnostics:
-            Preprocessing diagnostics for the patient.
-    """
 
     patient_id = int(
         metadata_row["Patient_id"]
@@ -262,8 +241,8 @@ def process_patient(
     )
 
     patient_path = find_patient_file(
-        diagnosis=diagnosis,
-        patient_id=patient_id,
+        diagnosis,
+        patient_id,
     )
 
     patient_data = load_patient_json(
@@ -275,61 +254,82 @@ def process_patient(
     )
 
     features = {
-        "patient_id": patient_id,
-        "diagnosis": diagnosis,
-        "target": TARGET_DIAGNOSES[diagnosis],
+
+        "patient_id":
+            patient_id,
+
+        "diagnosis":
+            diagnosis,
     }
 
     diagnostics = {
-        "patient_id": patient_id,
-        "diagnosis": diagnosis,
-        "file": str(
-            patient_path.relative_to(
-                PROJECT_ROOT
-            )
-        ),
-        "valid": True,
-        "channel_lengths": {},
-        "short_channels": [],
+
+        "patient_id":
+            patient_id,
+
+        "diagnosis":
+            diagnosis,
+
+        "file":
+            str(
+                patient_path.relative_to(
+                    PROJECT_ROOT
+                )
+            ),
+
+        "short_channels":
+            [],
     }
 
     for channel_name in ENOSE_CHANNELS:
+
         values = channels[channel_name]
 
         sample_count = len(values)
 
-        diagnostics["channel_lengths"][
-            channel_name
-        ] = sample_count
+        if (
+            sample_count
+            < SHORT_SEQUENCE_THRESHOLD
+        ):
 
-        if sample_count < SHORT_SEQUENCE_THRESHOLD:
-            diagnostics["short_channels"].append(
+            diagnostics[
+                "short_channels"
+            ].append(
                 {
-                    "channel": channel_name,
-                    "sample_count": sample_count,
+                    "channel":
+                        channel_name,
+
+                    "sample_count":
+                        sample_count,
                 }
             )
 
-        channel_features = calculate_features(
-            channel_name=channel_name,
-            values=values,
+        channel_features = (
+            calculate_features(
+                channel_name,
+                values,
+            )
         )
 
         features.update(
             channel_features
         )
 
-    return features, diagnostics
+    return (
+        features,
+        diagnostics,
+    )
 
 
 # ============================================================
-# Main preprocessing pipeline
+# Main preprocessing
 # ============================================================
 
 def main():
+
     print("=" * 70)
     print(
-        "BioSense AI - S-O-H Data Preprocessing"
+        "BioSense AI - Multi-Class S-O-H Preprocessing"
     )
     print("=" * 70)
 
@@ -339,30 +339,11 @@ def main():
     )
 
     if not METADATA_PATH.exists():
+
         raise FileNotFoundError(
-            f"Metadata file not found: "
+            f"Metadata not found:\n"
             f"{METADATA_PATH}"
         )
-
-    if not DATA_DIR.exists():
-        raise FileNotFoundError(
-            f"Data directory not found: "
-            f"{DATA_DIR}"
-        )
-
-    print(
-        f"\nDataset root: {DATASET_ROOT}"
-    )
-    print(
-        f"Metadata: {METADATA_PATH}"
-    )
-    print(
-        f"Data directory: {DATA_DIR}"
-    )
-
-    # --------------------------------------------------------
-    # Load metadata
-    # --------------------------------------------------------
 
     metadata = pd.read_csv(
         METADATA_PATH
@@ -383,73 +364,54 @@ def main():
         "Site",
     }
 
-    missing_columns = (
+    missing = (
         required_columns
         - set(metadata.columns)
     )
 
-    if missing_columns:
+    if missing:
+
         raise ValueError(
-            "Missing required metadata "
-            f"columns: {sorted(missing_columns)}"
+            f"Missing columns: {sorted(missing)}"
         )
-
-    # --------------------------------------------------------
-    # Filter target classes
-    # --------------------------------------------------------
-
-    filtered = metadata[
-        metadata["Diagnosis"].isin(
-            TARGET_DIAGNOSES.keys()
-        )
-    ].copy()
-
-    filtered["target"] = (
-        filtered["Diagnosis"].map(
-            TARGET_DIAGNOSES
-        )
-    )
 
     print(
-        f"Target rows after filtering: "
-        f"{len(filtered)}"
+        "\nDiagnosis distribution:"
     )
 
-    print("\nTarget distribution:")
-
-    target_counts = (
-        filtered["target"]
+    diagnosis_counts = (
+        metadata["Diagnosis"]
         .value_counts()
         .sort_index()
     )
 
-    for target, count in (
-        target_counts.items()
+    for diagnosis, count in (
+        diagnosis_counts.items()
     ):
+
         print(
-            f"  {target} - "
-            f"{TARGET_NAMES[target]}: "
-            f"{count}"
+            f"  {diagnosis}: {count}"
         )
 
     # --------------------------------------------------------
-    # Process patients
+    # Process all patients
     # --------------------------------------------------------
 
     processed_rows = []
-    diagnostics = []
+
     failed_patients = []
 
     short_channel_records = []
 
     print(
-        "\nProcessing patient sensor files..."
+        "\nProcessing patient files..."
     )
 
     for index, (_, row) in enumerate(
-        filtered.iterrows(),
+        metadata.iterrows(),
         start=1,
     ):
+
         patient_id = int(
             row["Patient_id"]
         )
@@ -459,57 +421,66 @@ def main():
         )
 
         try:
+
             (
                 features,
-                patient_diagnostics,
+                diagnostics,
             ) = process_patient(row)
 
             processed_rows.append(
                 features
             )
 
-            diagnostics.append(
-                patient_diagnostics
-            )
+            for short_channel in (
+                diagnostics[
+                    "short_channels"
+                ]
+            ):
 
-            if patient_diagnostics[
-                "short_channels"
-            ]:
-                for short_channel in (
-                    patient_diagnostics[
-                        "short_channels"
-                    ]
-                ):
-                    short_channel_records.append(
-                        {
-                            "patient_id": patient_id,
-                            "diagnosis": diagnosis,
-                            "channel": short_channel[
+                short_channel_records.append(
+                    {
+                        "patient_id":
+                            patient_id,
+
+                        "diagnosis":
+                            diagnosis,
+
+                        "channel":
+                            short_channel[
                                 "channel"
                             ],
-                            "sample_count": short_channel[
+
+                        "sample_count":
+                            short_channel[
                                 "sample_count"
                             ],
-                        }
-                    )
+                    }
+                )
 
         except Exception as exc:
+
             failed_patients.append(
                 {
-                    "patient_id": patient_id,
-                    "diagnosis": diagnosis,
-                    "error": str(exc),
+                    "patient_id":
+                        patient_id,
+
+                    "diagnosis":
+                        diagnosis,
+
+                    "error":
+                        str(exc),
                 }
             )
 
-        if index % 50 == 0:
+        if index % 100 == 0:
+
             print(
                 f"  Processed "
-                f"{index}/{len(filtered)} patients"
+                f"{index}/{len(metadata)}"
             )
 
     # --------------------------------------------------------
-    # Create dataframe
+    # DataFrame
     # --------------------------------------------------------
 
     processed_df = pd.DataFrame(
@@ -517,39 +488,30 @@ def main():
     )
 
     if processed_df.empty:
+
         raise RuntimeError(
-            "No patients were successfully "
-            "processed."
+            "No patients were processed."
         )
-
-    # --------------------------------------------------------
-    # Feature columns
-    # --------------------------------------------------------
-
-    identifier_columns = {
-        "patient_id",
-        "diagnosis",
-        "target",
-    }
 
     feature_columns = [
         column
         for column in processed_df.columns
-        if column not in identifier_columns
+        if column not in {
+            "patient_id",
+            "diagnosis",
+        }
     ]
 
-    # --------------------------------------------------------
-    # Validate features
-    # --------------------------------------------------------
-
-    missing_feature_values = int(
-        processed_df[feature_columns]
+    missing_values = int(
+        processed_df[
+            feature_columns
+        ]
         .isna()
         .sum()
         .sum()
     )
 
-    infinite_feature_values = int(
+    infinite_values = int(
         np.isinf(
             processed_df[
                 feature_columns
@@ -558,7 +520,7 @@ def main():
     )
 
     # --------------------------------------------------------
-    # Save processed dataset
+    # Save
     # --------------------------------------------------------
 
     processed_df.to_csv(
@@ -567,86 +529,123 @@ def main():
     )
 
     # --------------------------------------------------------
-    # Generate report
+    # Report
     # --------------------------------------------------------
 
-    report_lines = [
-        "BioSense AI - S-O-H Preprocessing Report",
+    report = [
+
+        "BioSense AI - S-O-H Multi-Class "
+        "Preprocessing Report",
+
         "=" * 70,
+
         "",
-        f"Source dataset: {DATASET_ROOT}",
+
         f"Metadata rows: {len(metadata)}",
-        f"Target rows: {len(filtered)}",
+
         (
             "Successfully processed: "
             f"{len(processed_df)}"
         ),
+
         (
             "Failed patients: "
             f"{len(failed_patients)}"
         ),
+
         "",
-        "Target mapping:",
-        "  0 = Z00 = Healthy Control",
-        "  1 = C34 = Lung Cancer",
+
+        "Research task:",
+
+        (
+            "Multi-class classification across "
+            "all diagnostic groups in S-O-H."
+        ),
+
         "",
+
         "Primary sensor channels:",
+
         ", ".join(ENOSE_CHANNELS),
+
         "",
+
         (
             "Number of feature columns: "
             f"{len(feature_columns)}"
         ),
+
         "",
-        "Feature extraction per channel:",
-        "  - sample count",
-        "  - mean",
-        "  - standard deviation",
-        "  - minimum",
-        "  - maximum",
-        "  - median",
-        "  - range",
-        "  - first value",
-        "  - last value",
-        "  - mean absolute first difference",
-        "  - standard deviation of first differences",
-        "",
-        "Target distribution:",
+
+        "Diagnosis distribution:",
     ]
 
-    processed_target_counts = (
-        processed_df["target"]
+    processed_counts = (
+        processed_df["diagnosis"]
         .value_counts()
         .sort_index()
     )
 
-    for target, count in (
-        processed_target_counts.items()
+    for diagnosis, count in (
+        processed_counts.items()
     ):
-        report_lines.append(
-            f"  {target} - "
-            f"{TARGET_NAMES[target]}: "
-            f"{count}"
+
+        report.append(
+            f"  {diagnosis}: {count}"
         )
 
-    report_lines.extend(
+    report.extend(
         [
+
             "",
+
+            "Feature extraction per channel:",
+
+            "  - sample count",
+
+            "  - mean",
+
+            "  - standard deviation",
+
+            "  - minimum",
+
+            "  - maximum",
+
+            "  - median",
+
+            "  - range",
+
+            "  - first value",
+
+            "  - last value",
+
+            "  - mean absolute first difference",
+
+            "  - standard deviation of first differences",
+
+            "",
+
             "Feature validation:",
+
             (
                 "  Missing feature values: "
-                f"{missing_feature_values}"
+                f"{missing_values}"
             ),
+
             (
                 "  Infinite feature values: "
-                f"{infinite_feature_values}"
+                f"{infinite_values}"
             ),
+
             "",
+
             "Short channel observations:",
+
             (
                 "  Threshold: "
                 f"< {SHORT_SEQUENCE_THRESHOLD} samples"
             ),
+
             (
                 "  Total short-channel observations: "
                 f"{len(short_channel_records)}"
@@ -655,80 +654,116 @@ def main():
     )
 
     if short_channel_records:
+
         for record in short_channel_records:
-            report_lines.append(
+
+            report.append(
                 f"  Patient "
                 f"{record['patient_id']} "
                 f"({record['diagnosis']}), "
                 f"{record['channel']}: "
                 f"{record['sample_count']} samples"
             )
+
     else:
-        report_lines.append(
+
+        report.append(
             "  None"
         )
 
-    report_lines.extend(
+    report.extend(
         [
+
             "",
-            "Output:",
-            f"  {OUTPUT_CSV}",
-            "",
+
             "Failed patients:",
         ]
     )
 
     if failed_patients:
+
         for failed in failed_patients:
-            report_lines.append(
+
+            report.append(
                 f"  Patient "
                 f"{failed['patient_id']} "
                 f"({failed['diagnosis']}): "
                 f"{failed['error']}"
             )
+
     else:
-        report_lines.append(
+
+        report.append(
             "  None"
         )
 
-    report_lines.extend(
+    report.extend(
         [
+
             "",
+
             "Processing policy:",
+
             "  - One row represents one patient.",
-            "  - Only R1-R17 are used as the primary sensor inputs.",
+
+            "  - All diagnostic groups are retained.",
+
+            "  - Only R1-R17 are used as primary sensor inputs.",
+
             "  - No artificial sensor samples are created.",
-            "  - Short but valid sensor sequences are retained.",
-            "  - Sample counts are recorded as features.",
-            "  - Patient_id is retained only as an identifier.",
-            "  - Diagnosis and target are retained for labels.",
-            "  - Age, gender, site, week and datetime are not used as model features.",
-            "  - Auxiliary sensors are excluded from this first baseline dataset.",
+
+            "  - Short valid recordings are retained.",
+
+            "  - Sample counts are recorded.",
+
+            "  - Patient_id is an identifier only.",
+
+            "  - Diagnosis is the classification label.",
+
+            "  - Age, gender, site, week and datetime are not model features.",
+
+            "  - Auxiliary sensors are excluded from the first baseline.",
+
             "  - No machine-learning model is trained in this phase.",
+
             "",
+
+            "Output:",
+
+            f"  {OUTPUT_CSV}",
+
+            "",
+
             "Medical disclaimer:",
-            "This application is an experimental research prototype and is not",
-            "a medical diagnostic device. Its results must not be used to diagnose,",
-            "treat, or rule out cancer. Medical decisions should be made only by",
-            "qualified healthcare professionals.",
+
+            "This application is an experimental research prototype "
+            "and is not a medical diagnostic device.",
+
+            "Its results must not be used to diagnose, treat, "
+            "or rule out cancer.",
+
+            "Medical decisions should be made only by qualified "
+            "healthcare professionals.",
         ]
     )
 
     REPORT_PATH.write_text(
-        "\n".join(report_lines),
+        "\n".join(report),
         encoding="utf-8",
     )
 
     # --------------------------------------------------------
-    # Console summary
+    # Final console summary
     # --------------------------------------------------------
 
     print(
         "\n" + "=" * 70
     )
+
     print(
-        "PREPROCESSING COMPLETE"
+        "MULTI-CLASS PREPROCESSING COMPLETE"
     )
+
     print(
         "=" * 70
     )
@@ -754,39 +789,35 @@ def main():
     )
 
     print(
-        "\nTarget distribution:"
+        "\nDiagnosis distribution:"
     )
 
-    for target, count in (
-        processed_df["target"]
+    print(
+        processed_df["diagnosis"]
         .value_counts()
         .sort_index()
-        .items()
-    ):
-        print(
-            f"  {target} - "
-            f"{TARGET_NAMES[target]}: "
-            f"{count}"
-        )
+    )
 
     print(
         "\nMissing feature values: "
-        f"{missing_feature_values}"
+        f"{missing_values}"
     )
 
     print(
         "Infinite feature values: "
-        f"{infinite_feature_values}"
+        f"{infinite_values}"
     )
 
     print(
         "\nSaved dataset:"
     )
+
     print(OUTPUT_CSV)
 
     print(
         "\nSaved report:"
     )
+
     print(REPORT_PATH)
 
 
